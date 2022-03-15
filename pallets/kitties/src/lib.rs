@@ -17,6 +17,8 @@ pub mod pallet {
 	#[cfg(feature = "std")]
 	use frame_support::serde::{Deserialize, Serialize};
 
+	use frame_support::traits::UnixTime;
+
 	type AccountOf<T> = <T as frame_system::Config>::AccountId;
 	type BalanceOf<T> =
 		<<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
@@ -30,6 +32,7 @@ pub mod pallet {
 		pub price: Option<BalanceOf<T>>,
 		pub gender: Gender,
 		pub owner: AccountOf<T>,
+		pub date_created: u64,
 	}
 
 	// Enum declaration for Gender.
@@ -59,6 +62,8 @@ pub mod pallet {
 
 		/// The type of Randomness we want to specify for this pallet.
 		type KittyRandomness: Randomness<Self::Hash, Self::BlockNumber>;
+
+		type TimeProvider: UnixTime;
 	}
 
 	// Errors.
@@ -329,6 +334,7 @@ pub mod pallet {
 				price: None,
 				gender: gender.unwrap_or_else(Self::gen_gender),
 				owner: owner.clone(),
+				date_created: T::TimeProvider::now().as_secs(),
 			};
 
 			let kitty_id = T::Hashing::hash_of(&kitty);
